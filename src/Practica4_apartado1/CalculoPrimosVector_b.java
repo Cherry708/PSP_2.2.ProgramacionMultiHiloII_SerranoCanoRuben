@@ -1,5 +1,7 @@
 package Practica4_apartado1;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import static Practica4_apartado1.CalculoPrimosVector_a.esPrimo;
 import static java.util.Collections.min;
 
@@ -14,8 +16,7 @@ public class CalculoPrimosVector_b {
                 200000069L, 4L, 4L, 4L, 4L, 4L, 4L, 4L,
                 200000081L, 4L, 4L, 4L, 4L, 4L, 4L, 4L,
                 200000083L, 4L, 4L, 4L, 4L, 4L, 4L, 4L,
-                200000089L, 4L, 4L, 4L, 4L, 4L, 4L, 4L,
-                200000093L, 4L, 4L, 4L, 4L, 4L, 4L, 4L
+                200000089L, 4L, 4L, 4L, 4L, 4L, 4L, 4L
         };
 
 
@@ -38,6 +39,7 @@ public class CalculoPrimosVector_b {
         long t1;
         long t2;
         double tt;
+        int contador = 0;
 
         System.out.println("");
         System.out.println("Implementación secuencial.");
@@ -46,6 +48,7 @@ public class CalculoPrimosVector_b {
         //Escribe aquí la implementación secuencial
         for (int i = 0; i < vectorNumeros.length; i++) {
             if (esPrimo(vectorNumeros[i])) {
+                contador++;
                 System.out.println(vectorNumeros[i] + " es primo");
             }
         }
@@ -53,7 +56,8 @@ public class CalculoPrimosVector_b {
         //Fin de la implementación secuencial
         t2 = System.nanoTime();
         tt = ((double) (t2 - t1)) / 1.0e9;
-
+        System.out.println();
+        System.out.println("El total de primos es: "+contador);
         System.out.println("Tiempo secuencial (seg.):\t\t\t" + tt);
     }
 
@@ -65,18 +69,19 @@ public class CalculoPrimosVector_b {
         System.out.println("");
         System.out.println("Implementación cíclica.");
 
-        MiHebraCiclica v[] = new MiHebraCiclica[numHebras];
+        MiHebraCiclica vectorHebras[] = new MiHebraCiclica[numHebras];
+        CuentaPrimos contador = new CuentaPrimos();
 
         t1 = System.nanoTime();
 
         for (int idHebra = 0; idHebra < numHebras; idHebra++) {
-            v[idHebra] = new MiHebraCiclica(idHebra, numHebras, vectorNumeros);
-            v[idHebra].start();
+            vectorHebras[idHebra] = new MiHebraCiclica(idHebra, numHebras, vectorNumeros,contador);
+            vectorHebras[idHebra].start();
         }
 
         for (int i = 0; i < numHebras; i++) {
             try {
-                v[i].join();
+                vectorHebras[i].join();
             } catch (InterruptedException ex) {
                 ex.printStackTrace();
             }
@@ -84,7 +89,8 @@ public class CalculoPrimosVector_b {
 
         t2 = System.nanoTime();
         tt = ((double) (t2 - t1)) / 1.0e9;
-
+        System.out.println();
+        System.out.println("El total de primos es: "+contador.muestraIncrementador());
         System.out.println("Tiempo cíclico (seg.):\t\t\t" + tt);
     }
 
@@ -101,11 +107,12 @@ public class CalculoPrimosVector_b {
         System.out.println("Implementación por bloques.");
 
         MiHebraBloques v[] = new MiHebraBloques[numHebras];
+        CuentaPrimos contador = new CuentaPrimos();
 
         t1 = System.nanoTime();
 
         for (int idHebra = 0; idHebra < numHebras; idHebra++) {
-            v[idHebra] = new MiHebraBloques(idHebra, numHebras, vectorNumeros);
+            v[idHebra] = new MiHebraBloques(idHebra, numHebras, vectorNumeros,contador);
             v[idHebra].start();
         }
 
@@ -119,7 +126,8 @@ public class CalculoPrimosVector_b {
 
         t2 = System.nanoTime();
         tt = ((double) (t2 - t1)) / 1.0e9;
-
+        System.out.println();
+        System.out.println("El total de primos es: "+contador.muestraIncrementador());
         System.out.println("Tiempo Bloques (seg.):\t\t\t" + tt);
     }
 
@@ -143,31 +151,38 @@ class MiHebraCiclica extends Thread {
     int idHebra;
     int numHebras;
     long[] vectorNumeros;
+    CuentaPrimos contador;
 
-    public MiHebraCiclica(int idHebra, int numHebras, long[] vectorNumeros) {
+    public MiHebraCiclica(int idHebra, int numHebras, long[] vectorNumeros, CuentaPrimos contador) {
         this.idHebra = idHebra;
         this.numHebras = numHebras;
         this.vectorNumeros = vectorNumeros;
+        this.contador = contador;
+
     }
 
     public void run() {
         for (int i = idHebra; i < vectorNumeros.length; i += numHebras) {
             if (esPrimo(vectorNumeros[i])) {
+                contador.incrementaIncrementador();
                 System.out.println(vectorNumeros[i] + " es primo (hebra: "+idHebra+")");
             }
         }
     }
+
 }
 
 class MiHebraBloques extends Thread{
     int idHebra;
     int numHebra;
     long[] vectorNumeros;
+    CuentaPrimos contador;
 
-    public MiHebraBloques(int idHebra, int numHebra, long[] vectorNumeros){
+    public MiHebraBloques(int idHebra, int numHebra, long[] vectorNumeros, CuentaPrimos contador){
         this.idHebra = idHebra;
         this.numHebra = numHebra;
         this.vectorNumeros = vectorNumeros;
+        this.contador = contador;
     }
 
     public void run(){
@@ -180,8 +195,20 @@ class MiHebraBloques extends Thread{
         fin = Math.min(n,(idHebra+1)*tamano);
         for (int i = ini ; i < fin; i++){
             if (esPrimo(vectorNumeros[i])) {
+                contador.incrementaIncrementador();
                 System.out.println(vectorNumeros[i] + " es primo (hebra: "+idHebra+")");
             }
         }
+    }
+}
+class CuentaPrimos {
+    AtomicInteger incrementadorAtomico = new AtomicInteger(0);
+
+    void incrementaIncrementador(){
+        incrementadorAtomico.getAndIncrement();
+    }
+
+    AtomicInteger muestraIncrementador(){
+        return incrementadorAtomico;
     }
 }

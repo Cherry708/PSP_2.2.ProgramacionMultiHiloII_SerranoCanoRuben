@@ -70,7 +70,7 @@ public class CalculoPrimosVector_a {
         t1 = System.nanoTime();
 
         for (int idHebra = 0; idHebra < numHebras; idHebra++) {
-            v[idHebra] = new MiHebraCiclica(idHebra, numHebras, vectorNumeros);
+            //v[idHebra] = new MiHebraCiclica(idHebra, numHebras, vectorNumeros);
             v[idHebra].start();
         }
 
@@ -105,7 +105,7 @@ public class CalculoPrimosVector_a {
         t1 = System.nanoTime();
 
         for (int idHebra = 0; idHebra < numHebras; idHebra++) {
-            v[idHebra] = new MiHebraBloques(idHebra, numHebras, vectorNumeros);
+           //v[idHebra] = new MiHebraBloques(idHebra, numHebras, vectorNumeros);
             v[idHebra].start();
         }
 
