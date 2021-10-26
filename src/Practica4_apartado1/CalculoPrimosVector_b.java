@@ -39,7 +39,8 @@ public class CalculoPrimosVector_b {
         long t1;
         long t2;
         double tt;
-        int contador = 0;
+        int contadorPrimos = 0;
+        int contadorNoPrimos = 0;
 
         System.out.println("");
         System.out.println("Implementación secuencial.");
@@ -48,8 +49,11 @@ public class CalculoPrimosVector_b {
         //Escribe aquí la implementación secuencial
         for (int i = 0; i < vectorNumeros.length; i++) {
             if (esPrimo(vectorNumeros[i])) {
-                contador++;
+                contadorPrimos++;
                 System.out.println(vectorNumeros[i] + " es primo");
+            } else {
+                contadorNoPrimos++;
+                System.out.println(vectorNumeros[i] + " no es primo");
             }
         }
 
@@ -57,7 +61,8 @@ public class CalculoPrimosVector_b {
         t2 = System.nanoTime();
         tt = ((double) (t2 - t1)) / 1.0e9;
         System.out.println();
-        System.out.println("El total de primos es: "+contador);
+        System.out.println("El total de primos es: "+contadorPrimos);
+        System.out.println("El total de no primos es: "+contadorNoPrimos);
         System.out.println("Tiempo secuencial (seg.):\t\t\t" + tt);
     }
 
@@ -90,7 +95,8 @@ public class CalculoPrimosVector_b {
         t2 = System.nanoTime();
         tt = ((double) (t2 - t1)) / 1.0e9;
         System.out.println();
-        System.out.println("El total de primos es: "+contador.muestraIncrementador());
+        System.out.println("El total de primos es: "+contador.muestraPrimos());
+        System.out.println("El total de no primos es: "+contador.muestraNoPrimos());
         System.out.println("Tiempo cíclico (seg.):\t\t\t" + tt);
     }
 
@@ -127,7 +133,8 @@ public class CalculoPrimosVector_b {
         t2 = System.nanoTime();
         tt = ((double) (t2 - t1)) / 1.0e9;
         System.out.println();
-        System.out.println("El total de primos es: "+contador.muestraIncrementador());
+        System.out.println("El total de primos es: "+contador.muestraPrimos());
+        System.out.println("El total de no primos es: "+contador.muestraNoPrimos());
         System.out.println("Tiempo Bloques (seg.):\t\t\t" + tt);
     }
 
@@ -164,8 +171,11 @@ class MiHebraCiclica extends Thread {
     public void run() {
         for (int i = idHebra; i < vectorNumeros.length; i += numHebras) {
             if (esPrimo(vectorNumeros[i])) {
-                contador.incrementaIncrementador();
+                contador.incrementaPrimo();
                 System.out.println(vectorNumeros[i] + " es primo (hebra: "+idHebra+")");
+            } else {
+                contador.incrementaNoPrimo();
+                System.out.println(vectorNumeros[i] + " no es primo (hebra: " + idHebra + ")");
             }
         }
     }
@@ -195,20 +205,29 @@ class MiHebraBloques extends Thread{
         fin = Math.min(n,(idHebra+1)*tamano);
         for (int i = ini ; i < fin; i++){
             if (esPrimo(vectorNumeros[i])) {
-                contador.incrementaIncrementador();
+                contador.incrementaPrimo();
                 System.out.println(vectorNumeros[i] + " es primo (hebra: "+idHebra+")");
+            } else {
+                contador.incrementaNoPrimo();
+                System.out.println(vectorNumeros[i] + " no es primo (hebra: " + idHebra + ")");
             }
         }
     }
 }
 class CuentaPrimos {
-    AtomicInteger incrementadorAtomico = new AtomicInteger(0);
+    AtomicInteger sumaPrimoAtomico = new AtomicInteger(0);
 
-    void incrementaIncrementador(){
-        incrementadorAtomico.getAndIncrement();
+    AtomicInteger sumaNoPrimoAtomico = new AtomicInteger(0);
+
+    void incrementaPrimo(){
+        sumaPrimoAtomico.getAndIncrement();
     }
 
-    AtomicInteger muestraIncrementador(){
-        return incrementadorAtomico;
+    void incrementaNoPrimo(){ sumaNoPrimoAtomico.getAndIncrement();}
+
+    AtomicInteger muestraPrimos(){
+        return sumaPrimoAtomico;
     }
+
+    AtomicInteger muestraNoPrimos(){return sumaNoPrimoAtomico;}
 }
