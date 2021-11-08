@@ -138,8 +138,7 @@ public class CalculoPrimosVector_b {
         System.out.println("Tiempo Bloques (seg.):\t\t\t" + tt);
     }
 
-
-    static boolean esPrimo(long num) {
+     static boolean esPrimo(long num) {
         boolean primo;
         if (num < 2) {
             primo = false;
@@ -153,6 +152,7 @@ public class CalculoPrimosVector_b {
         }
         return (primo);
     }
+
 }
 class MiHebraCiclica extends Thread {
     int idHebra;

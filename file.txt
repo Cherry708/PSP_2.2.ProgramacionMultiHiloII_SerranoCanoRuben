@@ -1,0 +1,1 @@
+CalculoPrimosVector, algoritmo por bloques y cíclico, atómico, sin reducciones
